@@ -1,0 +1,22 @@
+{
+  "customers": [
+    {
+      "first_name": "Lane",
+      "last_name": "Vivian",
+      "email": "tamiwanyja@mailinator.com",
+      "phone": "Skyler",
+      "address": "Solomon",
+      "description": "Nasim",
+      "id": 2
+    },
+    {
+      "first_name": "Dilara",
+      "last_name": "Sfuanova",
+      "email": "dsafuanova15@gmail.com",
+      "phone": "+380352250456",
+      "address": "Travneve, 10, Luhansk region, 92506, Ukraine, Travneve, 10, Luhansk region, 92506, Ukraine",
+      "description": "dilara's test",
+      "id": 3
+    }
+  ]
+}
