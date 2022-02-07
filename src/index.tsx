@@ -1,15 +1,40 @@
-import React from 'react';
-import ReactDOM from 'react-dom';
-import './index.css';
-import App from './App';
-import * as serviceWorker from './serviceWorker';
-import { BrowserRouter } from 'react-router-dom';
+import * as React from "react";
+import { render } from "react-dom";
+import { BrowserRouter, Link, Switch, Route } from "react-router-dom";
+import styled from "styled-components";
+import { ToastContainer } from "react-toastify";
+import UserList from "./components/UserList";
+import UserItem from "./components/UserItem";
+import CssBaseline from "@material-ui/core/CssBaseline";
+import "react-toastify/dist/ReactToastify.min.css";
 
-ReactDOM.render( <BrowserRouter>
-    <App />
-</BrowserRouter>, document.getElementById('root'));
+const StyledApp = styled.div`
+  background-color: #f4f6f8;
+  height: 100vh;
+  padding: 1rem;
+`;
 
-// If you want your app to work offline and load faster, you can change
-// unregister() to register() below. Note this comes with some pitfalls.
-// Learn more about service workers: https://bit.ly/CRA-PWA
-serviceWorker.unregister();
+function App() {
+  return (
+    <BrowserRouter>
+      <StyledApp>
+        <CssBaseline />
+        <Switch>
+          <Route path={"/"} exact component={UserList} />
+          <Route path={"/edit/:id"} exact component={UserItem} />
+        </Switch>
+        {/* <UserList /> */}
+        <ToastContainer
+          position="bottom-center"
+          autoClose={5000}
+          hideProgressBar={false}
+          newestOnTop={false}
+          closeOnClick
+        />
+      </StyledApp>
+    </BrowserRouter>
+  );
+}
+
+const rootElement = document.getElementById("root");
+render(<App />, rootElement);
