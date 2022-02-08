@@ -13,7 +13,7 @@ const users = [
     firstname: "Dilara",
     lastname: "Sfuanova",
     enabled: true,
-    lastlogin: new Date()
+    lastlogin: Date.now()
   },
   {
     id: 1644268582432,
@@ -21,7 +21,7 @@ const users = [
     firstname: "Daniel",
     lastname: "Gilbert",
     enabled: true,
-    lastlogin: new Date()
+    lastlogin: Date.now()
   }
 ];
 

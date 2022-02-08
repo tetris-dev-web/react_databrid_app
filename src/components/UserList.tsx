@@ -85,7 +85,7 @@ const UserList = observer(() => {
                     <TableCell align="center">
                       {user.firstname} {user.lastname}
                     </TableCell>
-                    <TableCell align="center">{user.lastlogin}</TableCell>
+                    <TableCell align="center">{new Date(user.lastlogin).toLocaleDateString() + ' ' + new Date(user.lastlogin).toLocaleTimeString()}</TableCell>
                     <TableCell align="center">
                       {user.enabled ? "True" : "False"}
                     </TableCell>

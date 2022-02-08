@@ -8,7 +8,7 @@ export interface IUser {
   firstname: string;
   lastname: string;
   enabled: boolean;
-  lastlogin: Date;
+  lastlogin: number;
 }
 
 export class UserStore {
@@ -60,6 +60,7 @@ export class UserStore {
       return item;
     });
     this.users = updatedUsers;
+    console.log(this.users);
     toast.success("User updated", {
       position: toast.POSITION.BOTTOM_CENTER
     });

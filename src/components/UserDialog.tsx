@@ -61,7 +61,7 @@ export default function UserDialog({ isOpen, closeModal }: IProps) {
         firstname: values.firstname,
         lastname: values.lastname,
         enabled: enabled,
-        lastlogin: new Date()
+        lastlogin: Date.now()
       };
       setTimeout(() => {
         userStore.addUser(newUser);

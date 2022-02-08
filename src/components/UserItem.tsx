@@ -63,7 +63,7 @@ const UserItem = observer(() => {
           firstname: values.firstname,
           lastname: values.lastname,
           enabled: enabled,
-          lastlogin: new Date()
+          lastlogin: Date.now()
         };
         setTimeout(() => {
           userStore.updateUser(updateUser);
