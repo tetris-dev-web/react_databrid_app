@@ -1,4 +1,4 @@
-# react_databrid_app
+# react_datagrid_app
 Testing App using React + Databrid + KendoUI + Fake API
 
 ### Features
@@ -6,11 +6,11 @@ Insert, Listing, Update, Delete Users using Fake API
 
 ### Install
 
-  npm install
+    npm install
 
 ### Quickstart
 
-  npm start
+    npm start
 
 ### Technologies
 
@@ -24,9 +24,9 @@ Insert, Listing, Update, Delete Users using Fake API
 
 ### Pages
 
-- User List (Landing Page)
-- User Add (Dialog)
-- User Edit (Page)
+- User List (Landing Page) - Kendo UI
+- User Add (Dialog) - Kendo UI
+- User Edit (Page) - Material UI
 
 ### API
 
@@ -50,5 +50,5 @@ Insert, Listing, Update, Delete Users using Fake API
 - Button Color
 - Delete Confirm
 - Toast message for each action
-- Loading bar for APi call
+- Loading bar for API call
 - 404 error
