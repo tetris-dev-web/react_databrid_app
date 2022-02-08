@@ -7,14 +7,11 @@ import {
   FormControlLabel,
   Checkbox,
 } from "@material-ui/core";
-import { v4 as uuid } from "uuid";
 import * as Yup from "yup";
 import { useFormik, Form, FormikProvider } from "formik";
-import { useForm, Controller } from "react-hook-form";
-// import { useForm } from '../../hooks/useForm';
 import { makeStyles } from "@material-ui/core/styles";
 // import { LoadingButton } from "@material-ui/lab";
-import { useStores } from "../../use-stores";
+import { useStores } from "../use-stores";
 
 const useStyles = makeStyles({
   content: {
@@ -31,29 +28,22 @@ interface IProps {
 }
 export default function UserDialog({ isOpen, closeModal }: IProps) {
   const classes = useStyles();
-  const [text, setText] = useState("");
-  const { todoStore, userStore } = useStores();
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    console.log(e.target.value);
-    // setText(e.target.value);
-    // handleUser({e.target.name: e.target.value})
-  };
+  const { userStore } = useStores();
 
   const [enabled, setEnabled] = useState(false);
 
   const ValidationSchema = Yup.object().shape({
     username: Yup.string()
       .min(2, "Too Short!")
-      .max(50, "Too Long!")
+      .max(15, "Too Long!")
       .required("User Name required"),
     firstname: Yup.string()
       .min(2, "Too Short!")
-      .max(50, "Too Long!")
+      .max(25, "Too Long!")
       .required("First Name required"),
     lastname: Yup.string()
       .min(2, "Too Short!")
-      .max(50, "Too Long!")
+      .max(25, "Too Long!")
       .required("Last Name required"),
   });
 
@@ -65,23 +55,22 @@ export default function UserDialog({ isOpen, closeModal }: IProps) {
     },
     validationSchema: ValidationSchema,
     onSubmit: async (values, { setErrors, setSubmitting, resetForm }) => {
-      console.log("VALUE", values);
       const newUser = {
         id: Date.now(),
         username: values.username,
         firstname: values.firstname,
         lastname: values.lastname,
         enabled: enabled,
+        lastlogin: new Date()
       };
       setTimeout(() => {
         userStore.addUser(newUser);
         closeModal();
       }, 1000);
-      
     },
   });
 
-  const { errors, touched, handleSubmit, isSubmitting, getFieldProps } = formik;
+  const { errors, touched, handleSubmit, getFieldProps } = formik;
 
   return (
     <Modal aria-labelledby="modal-new-todo" open={isOpen} onClose={closeModal}>

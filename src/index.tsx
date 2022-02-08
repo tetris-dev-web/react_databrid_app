@@ -1,10 +1,12 @@
-import * as React from "react";
+import React, { useEffect } from "react";
 import { render } from "react-dom";
-import { BrowserRouter, Link, Switch, Route } from "react-router-dom";
+import "./api"; // mock api
+import { BrowserRouter, Switch, Route } from "react-router-dom";
 import styled from "styled-components";
 import { ToastContainer } from "react-toastify";
-import UserList from "./components/UserList";
-import UserItem from "./components/UserItem";
+import { UserList, UserItem } from "./components";
+import { useStores } from "./use-stores";
+// import UserItem from "./components/UserItem";
 import CssBaseline from "@material-ui/core/CssBaseline";
 import "react-toastify/dist/ReactToastify.min.css";
 
@@ -15,6 +17,11 @@ const StyledApp = styled.div`
 `;
 
 function App() {
+  const { userStore } = useStores();
+
+  useEffect(() => {
+    userStore.getUsers();
+  }, [userStore]);
   return (
     <BrowserRouter>
       <StyledApp>
