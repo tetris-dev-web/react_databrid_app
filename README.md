@@ -24,9 +24,9 @@ Insert, Listing, Update, Delete Users using Fake API
 
 ### Pages
 
-- User List (Landing Page)
-- User Add (Dialog)
-- User Edit (Page)
+- User List (Landing Page) - Kendo UI
+- User Add (Dialog) - Kendo UI
+- User Edit (Page) - Material UI
 
 ### API
 
