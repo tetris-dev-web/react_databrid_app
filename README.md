@@ -1,5 +1,5 @@
 # react_datagrid_app
-Testing App using React + Databrid + KendoUI + Fake API
+Testing assessment App using React + Datagrid + KendoUI + Fake API
 
 ### Features
 Insert, Listing, Update, Delete Users using Fake API
@@ -16,8 +16,8 @@ Insert, Listing, Update, Delete Users using Fake API
 
 - Typescript
 - React
-- Mobx
 - Kendo React
+- Material UI
 - MobX
 - formik, Yup
 - Axios
@@ -48,7 +48,7 @@ Insert, Listing, Update, Delete Users using Fake API
 ### UX
 
 - Button Color
-- Delete Confirm
+- Delete confirming dialog
 - Toast message for each action
-- Loading bar for API call
-- 404 error
+- Loading screen for API call
+- 404 error handling
