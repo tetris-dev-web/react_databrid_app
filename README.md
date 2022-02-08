@@ -1,4 +1,4 @@
-# react_databrid_app
+# react_datagrid_app
 Testing App using React + Databrid + KendoUI + Fake API
 
 ### Features
