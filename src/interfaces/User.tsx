@@ -1,8 +1,8 @@
-export interface User {
+export interface IUser {
   id: number;
   username?: string;
   firstname?: string;
   lastname?: string;
-  lastlogin?: string;
+  lastlogin?: number;
   enabled?: boolean;
 }

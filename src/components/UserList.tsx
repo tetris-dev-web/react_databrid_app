@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { observer } from "mobx-react";
 import { makeStyles } from "@material-ui/core/styles";
 
@@ -8,9 +8,10 @@ import { DataResult, process, State } from '@progress/kendo-data-query';
 import { Grid, GridColumn, GridCellProps, GridToolbar, GridDataStateChangeEvent, GridRowClickEvent } from '@progress/kendo-react-grid';
 import { Dialog, DialogActionsBar } from '@progress/kendo-react-dialogs';
 import { Button } from '@progress/kendo-react-buttons';
-import { User } from '../interfaces/User';
+import { IUser } from '../interfaces/User';
 
 import UserDialog from "./UserDialog";
+import AddUserDialog from "./AddUserDialog";
 import { useStores } from "../use-stores";
 
 const useStyles = makeStyles({
@@ -60,11 +61,10 @@ const UserList = observer(() => {
   // State Defination
   const [allowUnsort, setAllowUnsort] = React.useState<boolean>(true);
   const [multipleSort, setMultipleSort] = React.useState<boolean>(false);
-  const [visibleDialog, setVisibleDialog] = React.useState<boolean>(false);
   const [gridDataState, setGridDataState] = React.useState<State>(initialState.dataState);
   const [gridClickedRow, setGridClickedRow] = React.useState<any>({});
   const [result, setResult] = React.useState<DataResult>(initialState.result);
-  const [openAddForm, setOpenAddForm] = React.useState<boolean>(false);
+  const [openAddDialog, setOpenAddDialog] = React.useState<boolean>(false);
 
   // Event Handler
   const handleGridDataStateChange = (event: GridDataStateChangeEvent) => {
@@ -74,16 +74,15 @@ const UserList = observer(() => {
   }
 
   const handleGridRowClick = (event: GridRowClickEvent) => {
-    setVisibleDialog(true);
     setGridClickedRow(event.dataItem);
   }
 
-  const handleEnterEdit = (item: User) => {
+  const handleEnterEdit = (item: IUser) => {
     console.log(item.username);
   };
 
   const handleCancelAdd = () => {
-    setOpenAddForm(false);
+    setOpenAddDialog(false);
   };
 
   const handleAddSubmit = (event:any) => {
@@ -94,18 +93,25 @@ const UserList = observer(() => {
       return item;
     });
     console.log(event);
-    setOpenAddForm(false);
-  };
-
-  const toggleDialog = () => {
-    setVisibleDialog(!visibleDialog);
+    const newUser = {
+      id: Date.now(),
+      username: event.username,
+      firstname: event.firstname,
+      lastname: event.lastname,
+      enabled: event.enabled,
+      lastlogin: event.lastlogin
+    };
+    setTimeout(() => {
+      userStore.addUser(newUser);
+    }, 1000);
+    setOpenAddDialog(false);
   };
 
   // Cell Rendering
   const columnFullName = (props: GridCellProps) => {
     return (
       <td>
-        {props.dataItem.FirstName + " " + props.dataItem.LastName}
+        {props.dataItem.firstname + " " + props.dataItem.lastname}
       </td>
     );
   }
@@ -116,7 +122,7 @@ const UserList = observer(() => {
     const newDate = new Date(value);
     return (
       <td>
-        {new Date(value).toLocaleDateString() + ' ' + new Date(value).toLocaleTimeString()}
+        {newDate.toLocaleDateString() + ' ' + newDate.toLocaleTimeString()}
       </td>
     );
   }
@@ -147,9 +153,8 @@ const UserList = observer(() => {
 
   return (
     <>
-      {openAddForm && (
-        <UserDialog
-          isOpen={openAddForm}
+      {openAddDialog && (
+        <AddUserDialog
           cancelAdd={handleCancelAdd}
           onSubmit={handleAddSubmit}
         />
@@ -169,9 +174,9 @@ const UserList = observer(() => {
             <Button
               title="Add User"
               themeColor={"primary"}
-              onClick = {() => {setOpenAddForm(true)}}
+              onClick = {() => {setOpenAddDialog(true)}}
             >
-              Export to Excel
+              Add User
             </Button>
             <input
               type="checkbox"
