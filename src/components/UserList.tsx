@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useHistory } from "react-router-dom";
 import { observer } from "mobx-react";
-import { makeStyles } from "@material-ui/core/styles";
 
 import '@progress/kendo-theme-default/dist/all.scss';
 import '@progress/kendo-theme-default/dist/default-nordic.scss';

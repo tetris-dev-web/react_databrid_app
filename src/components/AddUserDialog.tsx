@@ -1,5 +1,5 @@
 import * as React from "react";
-import { Dialog, DialogActionsBar } from "@progress/kendo-react-dialogs";
+import { Dialog } from "@progress/kendo-react-dialogs";
 import {
   Form,
   Field,
@@ -8,7 +8,7 @@ import {
   FieldRenderProps
 } from "@progress/kendo-react-form";
 import { Input, Switch } from "@progress/kendo-react-inputs";
-import {DateInput, DateTimePicker } from "@progress/kendo-react-dateinputs";
+import { DateTimePicker } from "@progress/kendo-react-dateinputs";
 import { Error } from "@progress/kendo-react-labels";
 import { getter } from "@progress/kendo-react-common";
 import { Button } from '@progress/kendo-react-buttons';
