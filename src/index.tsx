@@ -4,9 +4,8 @@ import "./api"; // mock api
 import { BrowserRouter, Switch, Route } from "react-router-dom";
 import styled from "styled-components";
 import { ToastContainer } from "react-toastify";
-import { UserList, UserItem } from "./components";
+import { UserList, UserEdit, NotFound } from "./components";
 import { useStores } from "./use-stores";
-// import UserItem from "./components/UserItem";
 import CssBaseline from "@material-ui/core/CssBaseline";
 import "react-toastify/dist/ReactToastify.min.css";
 
@@ -22,18 +21,19 @@ function App() {
   useEffect(() => {
     userStore.getUsers();
   }, [userStore]);
+
   return (
     <BrowserRouter>
       <StyledApp>
         <CssBaseline />
         <Switch>
           <Route path={"/"} exact component={UserList} />
-          <Route path={"/edit/:id"} exact component={UserItem} />
+          <Route path={"/edit/:id"} exact component={UserEdit} />
+          <Route component={NotFound} />
         </Switch>
-        {/* <UserList /> */}
         <ToastContainer
           position="bottom-center"
-          autoClose={5000}
+          autoClose={3000}
           hideProgressBar={false}
           newestOnTop={false}
           closeOnClick

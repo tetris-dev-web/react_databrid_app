@@ -1,31 +1,25 @@
-import { decorate, observable } from "mobx";
+import { makeAutoObservable, observable } from "mobx";
 import { toast } from "react-toastify";
 import axios from '../utils/axios';
-
-export interface IUser {
-  id: number;
-  username: string;
-  firstname: string;
-  lastname: string;
-  enabled: boolean;
-  lastlogin: number;
-}
+import { IUser } from '../interfaces/User';
+import fakeRequest from "../utils/fakeRequest";
 
 export class UserStore {
-  // public users: IUser[] = [
-  //   { id: 1, username: "dilara516", firstname: "Dilara", lastname: "Sfuanova", enabled: true },
-  //   { id: 2, username: "daniel1014", firstname: "Daniel", lastname: "Gilbert", enabled: true },
-  //   { id: 3, username: "daniel1014", firstname: "Daniel", lastname: "Gilbert", enabled: true }
-  // ];
+  users: IUser[];
 
-  public users: IUser[] = [];
+  constructor () {
+    makeAutoObservable(this)
 
-  public getUsers = async () => {
+    this.users = [];
+  }
+
+  getUsers = async () => {
     const response = await axios.get('/api/getUsers');
-    this.users = response.data.users;
+    this.users = [...response.data.users];
+    return;
   }
   
-  public addUser = async (user: IUser) => {
+  addUser = async (user: IUser) => {
     const exists = this.users.filter(item => item.username === user.username);
     if (exists.length > 0) {
       toast.error("User already exists", {
@@ -42,7 +36,7 @@ export class UserStore {
     });
   };
 
-  public updateUser = async (user: IUser) => {
+  updateUser = async (user: IUser) => {
     const exists = this.users.filter(item => item.id === user.id);
     if (exists.length > 1 || exists.length === 0) {
       toast.error("User error", {
@@ -60,7 +54,6 @@ export class UserStore {
       return item;
     });
     this.users = updatedUsers;
-    console.log(this.users);
     toast.success("User updated", {
       position: toast.POSITION.BOTTOM_CENTER
     });
@@ -68,7 +61,7 @@ export class UserStore {
     
   };
 
-  public getUser = (id: number) => {
+  getUser = (id: number) => {
     const user = this.users.filter(item => item.id === id);
     return user;
     // console.log("id", typeof(id));
@@ -77,16 +70,16 @@ export class UserStore {
     // console.log(exists.length);
   }
 
-  public deleteUser = (id: number) => {
+  deleteUser = async (id: number) => {
     const updatedUsers = this.users.filter(user => user.id !== id);
     
+    await fakeRequest(1000);
+
     this.users = updatedUsers;
     toast.info("User deleted", {
       position: toast.POSITION.BOTTOM_CENTER
     });
+
+    return;
   };
 }
-
-decorate(UserStore, {
-  users: observable
-});

@@ -3,27 +3,8 @@
 // utils
 import mock from "../utils/mock";
 import fakeRequest from "../utils/fakeRequest";
-
+import users from "./users.json";
 // ----------------------------------------------------------------------
-
-const users = [
-  {
-    id: 1644268582478,
-    username: "dilara516",
-    firstname: "Dilara",
-    lastname: "Sfuanova",
-    enabled: true,
-    lastlogin: Date.now()
-  },
-  {
-    id: 1644268582432,
-    username: "daniel1014",
-    firstname: "Daniel",
-    lastname: "Gilbert",
-    enabled: true,
-    lastlogin: Date.now()
-  }
-];
 
 // ----------------------------------------------------------------------
 
