@@ -4,61 +4,134 @@ import {
   Form,
   Field,
   FormElement,
-  FieldRenderProps,
+  FormRenderProps,
+  FieldRenderProps
 } from "@progress/kendo-react-form";
 import { Input, Switch } from "@progress/kendo-react-inputs";
 import {DateInput } from "@progress/kendo-react-dateinputs";
 import { Error } from "@progress/kendo-react-labels";
+import { getter } from "@progress/kendo-react-common";
+import { Button } from '@progress/kendo-react-buttons';
 
 interface AddUserProps {
   cancelAdd: () => void;
   onSubmit: (event: any) => void;
 }
 
-const usernameValidator = (value: string) => {
-  if (value == "") return "Username is required.";
-  // if (value.length > 15) return "Username length should be less than 15.";
-}
+const usernameGetter: any = getter("username");
+const firstNameGetter: any = getter("firstname");
+const lastNameGetter: any = getter("lastname");
+const submitValidator = (values: any) => {
 
-const nameValidator = (value: string) => {
-  if (value == "") return "required.";
-  // if (value.length > 15) return "length should be less than 15.";
-}
+  let validated: boolean = true;
 
-const submitValidator = (value: string) => {
-  // if (value.length > 40) return "Full name length should be less than 40";
+  // User name validation
+  let msgUsername:string = "";
+  const username = usernameGetter(values);
+  if (username == undefined || username == "") {
+    msgUsername = "Usernameis required";
+    validated = false;
+  }
+  if (username != undefined && username.length > 25) {
+    msgUsername = "User length should be less than 15.";
+    validated = false;
+  }
+  const alphanumericRegex: RegExp = new RegExp(/^[0-9a-zA-Z]+$/);
+  if (!alphanumericRegex.test(username)) {
+    msgUsername = "Username should be alphanumeric.";
+    validated = false;
+  }
+
+  // First name validation
+  let msgFirstName:string = "";
+  const firstName = firstNameGetter(values);
+  if (firstName == undefined || firstName == "") {
+    msgFirstName = "First name is required";
+    validated = false;
+  }
+  if (firstName != undefined && firstName.length > 25) {
+    msgFirstName = "First name length should be less than 25.";
+    validated = false;
+  }
+
+  // Last name validation
+  let msgLastName:string = "";
+  const lastName = lastNameGetter(values);
+  if (lastName == undefined || lastName == "") {
+    msgLastName = "Last name is required";
+    validated = false;
+  }
+  if (lastName != undefined && lastName.length > 25) {
+    msgLastName = "Last name length should be less than 25.";
+    validated = false;
+  }
+  
+  // Full name validation
+  if (firstName != undefined && lastName != undefined && (firstName.length + lastName.length) > 40) {
+    msgFirstName = "Full name length should be less than 40.";
+    msgLastName = "Full name length should be less than 40.";
+    validated = false;
+  }
+
+  // If validation is ok, pass it
+  if (validated) return;
+
+  return {
+    VALIDATION_SUMMARY: "Please input valid information",
+    ["username"]: msgUsername,
+    ["firstname"]: msgFirstName,
+    ["lastname"]: msgLastName
+  };
+};
+
+const ValidatedInput = (fieldRenderProps: FieldRenderProps) => {
+  const { validationMessage, visited, ...others } = fieldRenderProps;
+  return (
+    <div>
+      <Input {...others} />
+      {visited && validationMessage && <Error>{validationMessage}</Error>}
+    </div>
+  );
 };
 
 const AddUserDialog = (props: AddUserProps) => {
   return (
-    <Dialog title="Add User" onClose={props.cancelAdd}>
+    <Dialog title="Add User" onClose={props.cancelAdd} width = {400} >
       <Form
         onSubmit={props.onSubmit}
+        validator={submitValidator}
         render={(formRenderProps) => (
           <FormElement style={{ maxWidth: 650 }}>
             <fieldset className={"k-form-fieldset"}>
+            <legend className={"k-form-legend"}>
+              Please fill in the following information:
+            </legend>
+            {formRenderProps.visited &&
+              formRenderProps.errors &&
+              formRenderProps.errors.VALIDATION_SUMMARY && (
+                <div className={"k-messagebox k-messagebox-error"}>
+                  {formRenderProps.errors.VALIDATION_SUMMARY}
+                </div>
+              )}
               <div className="mb-3">
                 <Field
                   name={"username"}
-                  component={Input}
+                  component={ValidatedInput}
                   label={"User Name"}
-                  validator={usernameValidator}
                 />
               </div>
               <div className="mb-6">
                 <Field
                   name={"firstname"}
-                  component={Input}
+                  component={ValidatedInput}
                   label={"First Name"}
-                  validator={nameValidator}
                 />
               </div>
               <div className="mb-6">
                 <Field
                   name={"lastname"}
-                  component={Input}
+                  component={ValidatedInput}
                   label={"Last Name"}
-                  validator={nameValidator}
                 />
               </div>
               <div className="mb-6">
@@ -78,20 +151,19 @@ const AddUserDialog = (props: AddUserProps) => {
             </fieldset>
             <DialogActionsBar>
               <div className="k-form-buttons">
-                <button
-                  type={"submit"}
-                  className="k-button k-button-md k-rounded-md k-button-solid k-button-solid-primary"
+                <Button
+                  themeColor={"primary"}
                   disabled={!formRenderProps.allowSubmit}
                 >
                   Submit
-                </button>
-                <button
-                  type={"submit"}
-                  className="k-button k-button-md k-rounded-md k-button-solid k-button-solid-base"
+                </Button>
+                <Button
+                  fillMode="outline"
+                  themeColor={"info"}
                   onClick={props.cancelAdd}
                 >
                   Cancel
-                </button>
+                </Button>
               </div>
             </DialogActionsBar> 
           </FormElement>

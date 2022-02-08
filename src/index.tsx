@@ -6,9 +6,9 @@ import styled from "styled-components";
 import { ToastContainer } from "react-toastify";
 import { UserList, UserItem } from "./components";
 import { useStores } from "./use-stores";
-// import UserItem from "./components/UserItem";
 import CssBaseline from "@material-ui/core/CssBaseline";
 import "react-toastify/dist/ReactToastify.min.css";
+import { Loader } from "@progress/kendo-react-indicators";
 
 const StyledApp = styled.div`
   background-color: #f4f6f8;
@@ -22,6 +22,7 @@ function App() {
   useEffect(() => {
     userStore.getUsers();
   }, [userStore]);
+
   return (
     <BrowserRouter>
       <StyledApp>
@@ -33,11 +34,16 @@ function App() {
         {/* <UserList /> */}
         <ToastContainer
           position="bottom-center"
-          autoClose={5000}
+          autoClose={3000}
           hideProgressBar={false}
           newestOnTop={false}
           closeOnClick
         />
+        {userStore.isLoading && (
+          <div className = {'loaderContainer'} >
+            <Loader type="infinite-spinner" />
+          </div>
+        )}
       </StyledApp>
     </BrowserRouter>
   );

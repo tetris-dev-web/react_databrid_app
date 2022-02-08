@@ -4,7 +4,7 @@ import axios from '../utils/axios';
 import { IUser } from '../interfaces/User';
 
 export class UserStore {
-
+  isLoading: boolean = false;
   users: IUser[];
 
   constructor () {
@@ -16,6 +16,7 @@ export class UserStore {
   getUsers = async () => {
     const response = await axios.get('/api/getUsers');
     this.users = [...response.data.users];
+    return;
   }
   
   addUser = async (user: IUser) => {
@@ -44,7 +45,9 @@ export class UserStore {
       return;
     } 
 
+    this.isLoading = true;
     await axios.post('/api/updateUser', user);
+    this.isLoading = false;
 
     const updatedUsers = this.users.map(item => {
       if (item.id === user.id) {
@@ -70,12 +73,14 @@ export class UserStore {
     // console.log(exists.length);
   }
 
-  deleteUser = (id: number) => {
+  deleteUser = async (id: number) => {
     const updatedUsers = this.users.filter(user => user.id !== id);
     
     this.users = updatedUsers;
     toast.info("User deleted", {
       position: toast.POSITION.BOTTOM_CENTER
     });
+
+    return;
   };
 }

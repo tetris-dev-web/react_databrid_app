@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { useHistory } from "react-router-dom";
 import { observer } from "mobx-react";
 import { makeStyles } from "@material-ui/core/styles";
 
@@ -7,10 +8,9 @@ import '@progress/kendo-theme-default/dist/default-nordic.scss';
 import { DataResult, process, State } from '@progress/kendo-data-query';
 import { Grid, GridColumn, GridCellProps, GridToolbar, GridDataStateChangeEvent, GridRowClickEvent } from '@progress/kendo-react-grid';
 import { Dialog, DialogActionsBar } from '@progress/kendo-react-dialogs';
-import { Button } from '@progress/kendo-react-buttons';
-import { IUser } from '../interfaces/User';
+import { Button, ButtonGroup } from '@progress/kendo-react-buttons';
 
-import UserDialog from "./UserDialog";
+import { IUser } from '../interfaces/User';
 import AddUserDialog from "./AddUserDialog";
 import { useStores } from "../use-stores";
 
@@ -37,6 +37,13 @@ const useStyles = makeStyles({
 const UserList = observer(() => {
   const classes = useStyles();
   const { userStore } = useStores();
+  useEffect(() => {
+    userStore.getUsers().then(refreshUser);
+  }, [userStore]);  
+
+  // Local variables
+  let history = useHistory();
+  let deletingUserId:number = 0;
 
   const createDataState = (dataState: State) => {
     return {
@@ -65,6 +72,13 @@ const UserList = observer(() => {
   const [gridClickedRow, setGridClickedRow] = React.useState<any>({});
   const [result, setResult] = React.useState<DataResult>(initialState.result);
   const [openAddDialog, setOpenAddDialog] = React.useState<boolean>(false);
+  const [openDeleteDialog, setOpenDeleteDialog] = React.useState<boolean>(false);
+
+  // Load User List
+  const refreshUser = () => {
+    let updatedState = createDataState(gridDataState);
+    setResult(updatedState.result);
+  }
 
   // Event Handler
   const handleGridDataStateChange = (event: GridDataStateChangeEvent) => {
@@ -77,22 +91,24 @@ const UserList = observer(() => {
     setGridClickedRow(event.dataItem);
   }
 
-  const handleEnterEdit = (item: IUser) => {
-    console.log(item.username);
+  const handleGoEdit = (item: IUser) => {
+    history.push('/edit/' + item.id);
   };
 
+  const handleDeleteClick = (item: IUser) => {
+    setOpenDeleteDialog(true);
+    deletingUserId = item.id;
+  };
+
+  const handleDeleteConfirm = () => {
+    userStore.deleteUser(deletingUserId).then(refreshUser);
+    setOpenDeleteDialog(false);
+  }
   const handleCancelAdd = () => {
     setOpenAddDialog(false);
   };
 
   const handleAddSubmit = (event:any) => {
-    let newData = userStore.users.map((item) => {
-      if (event.username === item.username) {
-        item = { ...event };
-      }
-      return item;
-    });
-    console.log(event);
     const newUser = {
       id: Date.now(),
       username: event.username,
@@ -102,10 +118,14 @@ const UserList = observer(() => {
       lastlogin: event.lastlogin
     };
     setTimeout(() => {
-      userStore.addUser(newUser);
+      userStore.addUser(newUser).then(refreshUser);
     }, 1000);
     setOpenAddDialog(false);
   };
+
+  const toggleDeleteDialog = (event:any) => {
+    setOpenDeleteDialog(!openDeleteDialog);
+  }
 
   // Cell Rendering
   const columnFullName = (props: GridCellProps) => {
@@ -140,30 +160,36 @@ const UserList = observer(() => {
   const columnAction = (props: GridCellProps) => {
     return (
       <td>
-        <Button
-          fillMode="outline"
-          themeColor={"primary"}
-          onClick={() => handleEnterEdit(props.dataItem)}
-        >
-          Edit
-        </Button>      
+        <ButtonGroup>
+          <Button
+            fillMode="outline"
+            themeColor={"info"}
+            onClick={() => handleGoEdit(props.dataItem)}
+          >
+            Edit
+          </Button>
+          <Button
+            fillMode="solid"
+            themeColor={"primary"}
+            onClick={() =>handleDeleteClick(props.dataItem)}
+          >
+            Delete
+          </Button>
+        </ButtonGroup>
       </td>
     );
   }
 
   return (
     <>
-      {openAddDialog && (
-        <AddUserDialog
-          cancelAdd={handleCancelAdd}
-          onSubmit={handleAddSubmit}
-        />
-      )}
-        <div className={classes.list}>
+      <div className={classes.list}>
         <Grid
           data={result}
           pageable={true}
-          sortable={true}
+          sortable={{
+            allowUnsort: allowUnsort,
+            mode: multipleSort ? "multiple" : "single",
+          }}
           filterable={true}
           {...gridDataState}
           onDataStateChange={handleGridDataStateChange}
@@ -222,7 +248,36 @@ const UserList = observer(() => {
           <GridColumn field="enabled" cell={columnEnabled} filterable = {false} />
           <GridColumn cell={columnAction} filterable = {false} />
         </Grid>
-        </div>
+      </div>
+      {openAddDialog && (
+      <AddUserDialog
+        cancelAdd={handleCancelAdd}
+        onSubmit={handleAddSubmit}
+      />
+      )}
+      {openDeleteDialog && (
+        <Dialog title={"Please confirm delete"} onClose={() => {setOpenDeleteDialog(false)}}>
+        <p style={{ margin: "25px", textAlign: "center" }}>
+          Are you sure you want to delete?
+        </p>
+        <DialogActionsBar>
+          <Button
+            fillMode="outline"
+            themeColor={"info"}
+            onClick={() => {setOpenDeleteDialog(false)}}
+          >
+            No
+          </Button>
+          <Button
+            themeColor={"primary"}
+            onClick={handleDeleteConfirm}
+          >
+            Yes
+          </Button>
+        </DialogActionsBar>
+      </Dialog>        
+      )}
+
     </>
   );
 });
