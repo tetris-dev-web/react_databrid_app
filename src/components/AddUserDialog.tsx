@@ -8,7 +8,7 @@ import {
   FieldRenderProps
 } from "@progress/kendo-react-form";
 import { Input, Switch } from "@progress/kendo-react-inputs";
-import {DateInput } from "@progress/kendo-react-dateinputs";
+import {DateInput, DateTimePicker } from "@progress/kendo-react-dateinputs";
 import { Error } from "@progress/kendo-react-labels";
 import { getter } from "@progress/kendo-react-common";
 import { Button } from '@progress/kendo-react-buttons';
@@ -28,28 +28,31 @@ const submitValidator = (values: any) => {
   // User name validation
   let msgUsername:string = "";
   const username = usernameGetter(values);
-  if (username == undefined || username == "") {
+  if (validated && (username == undefined || username == "")) {
     msgUsername = "Usernameis required";
     validated = false;
   }
-  if (username != undefined && username.length > 25) {
+  if (validated && username != undefined && username.length > 25) {
     msgUsername = "User length should be less than 15.";
     validated = false;
   }
-  const alphanumericRegex: RegExp = new RegExp(/^[0-9a-zA-Z]+$/);
-  if (!alphanumericRegex.test(username)) {
-    msgUsername = "Username should be alphanumeric.";
-    validated = false;
+
+  if (validated) {
+    const alphanumericRegex: RegExp = new RegExp(/^[0-9a-zA-Z]+$/);
+    if (!alphanumericRegex.test(username)) {
+      msgUsername = "Username should be alphanumeric.";
+      validated = false;
+    }
   }
 
   // First name validation
   let msgFirstName:string = "";
   const firstName = firstNameGetter(values);
-  if (firstName == undefined || firstName == "") {
+  if (validated && (firstName == undefined || firstName == "")) {
     msgFirstName = "First name is required";
     validated = false;
   }
-  if (firstName != undefined && firstName.length > 25) {
+  if (validated && firstName != undefined && firstName.length > 25) {
     msgFirstName = "First name length should be less than 25.";
     validated = false;
   }
@@ -57,17 +60,17 @@ const submitValidator = (values: any) => {
   // Last name validation
   let msgLastName:string = "";
   const lastName = lastNameGetter(values);
-  if (lastName == undefined || lastName == "") {
+  if (validated && (lastName == undefined || lastName == "")) {
     msgLastName = "Last name is required";
     validated = false;
   }
-  if (lastName != undefined && lastName.length > 25) {
+  if (validated && lastName != undefined && lastName.length > 25) {
     msgLastName = "Last name length should be less than 25.";
     validated = false;
   }
   
   // Full name validation
-  if (firstName != undefined && lastName != undefined && (firstName.length + lastName.length) > 40) {
+  if (validated && firstName != undefined && lastName != undefined && (firstName.length + lastName.length) > 40) {
     msgFirstName = "Full name length should be less than 40.";
     msgLastName = "Full name length should be less than 40.";
     validated = false;
@@ -98,6 +101,13 @@ const AddUserDialog = (props: AddUserProps) => {
   return (
     <Dialog title="Add User" onClose={props.cancelAdd} width = {400} >
       <Form
+        initialValues={{
+          username: "",
+          firstname: "",
+          lastname: "",
+          lastlogin: new Date(),
+          enabled: true
+        }}
         onSubmit={props.onSubmit}
         validator={submitValidator}
         render={(formRenderProps) => (
@@ -106,50 +116,49 @@ const AddUserDialog = (props: AddUserProps) => {
             <legend className={"k-form-legend"}>
               Please fill in the following information:
             </legend>
-            {formRenderProps.visited &&
-              formRenderProps.errors &&
-              formRenderProps.errors.VALIDATION_SUMMARY && (
-                <div className={"k-messagebox k-messagebox-error"}>
-                  {formRenderProps.errors.VALIDATION_SUMMARY}
+              <div className = "row">
+                <div className="mb-6">
+                  <Field
+                    name={"username"}
+                    component={ValidatedInput}
+                    label={"User Name"}
+                  />
                 </div>
-              )}
-              <div className="mb-3">
-                <Field
-                  name={"username"}
-                  component={ValidatedInput}
-                  label={"User Name"}
-                />
+                <div className="mb-6">
+                  <Field
+                    name={"firstname"}
+                    component={ValidatedInput}
+                    label={"First Name"}
+                  />
+                </div>
+                <div className="mb-6">
+                  <Field
+                    name={"lastname"}
+                    component={ValidatedInput}
+                    label={"Last Name"}
+                  />
+                </div>
+                <div className="mb-6">
+                  <br />
+                  <Field
+                    name={"lastlogin"}
+                    component={DateTimePicker}
+                    label={"Last Login"}
+                  />
+                </div>
+                <div className="mb-6">
+                  <br />
+                  <label>Enabled</label>&nbsp;&nbsp;
+                  <Field
+                    name={"enabled"}
+                    component={Switch}
+                    label={"Enabled"}
+                  />
+                  <br />
+                </div>
               </div>
-              <div className="mb-6">
-                <Field
-                  name={"firstname"}
-                  component={ValidatedInput}
-                  label={"First Name"}
-                />
-              </div>
-              <div className="mb-6">
-                <Field
-                  name={"lastname"}
-                  component={ValidatedInput}
-                  label={"Last Name"}
-                />
-              </div>
-              <div className="mb-6">
-                <Field
-                  name={"lastlogin"}
-                  component={DateInput}
-                  label={"Last Login"}
-                />
-              </div>
-              <div className="mb-6">
-                <Field
-                  name={"enabled"}
-                  component={Switch}
-                  label={"Enabled"}
-                />
-              </div>
+              
             </fieldset>
-            <DialogActionsBar>
               <div className="k-form-buttons">
                 <Button
                   themeColor={"primary"}
@@ -165,7 +174,6 @@ const AddUserDialog = (props: AddUserProps) => {
                   Cancel
                 </Button>
               </div>
-            </DialogActionsBar> 
           </FormElement>
         )}
       />

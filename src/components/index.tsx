@@ -1,3 +1,3 @@
 export { default as UserList } from './UserList';
-export { default as UserItem } from './UserItem';
-export { default as UserDialog } from './UserDialog';
+export { default as UserEdit } from './UserEdit';
+export { default as NotFound } from './NotFound';

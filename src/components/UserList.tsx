@@ -12,39 +12,21 @@ import { Button, ButtonGroup } from '@progress/kendo-react-buttons';
 
 import { IUser } from '../interfaces/User';
 import AddUserDialog from "./AddUserDialog";
+import LoadingScreen from "./LoadingScreen";
 import { useStores } from "../use-stores";
 
-const useStyles = makeStyles({
-  header: {
-    display: "flex",
-    justifyContent: "space-between",
-    alignItems: "center",
-  },
-  list: {
-    margin: 0,
-    padding: 0,
-    listStyleType: "none",
-    minHeight: "300px",
-  },
-  table: {
-    minWidth: 650,
-  },
-  marginRight: {
-    marginRight: 10,
-  },
-});
-
 const UserList = observer(() => {
-  const classes = useStyles();
   const { userStore } = useStores();
+
+  // Load User list for the first time
   useEffect(() => {
-    userStore.getUsers().then(refreshUser);
+    if (userStore.users.length == 0) userStore.getUsers().then(refreshUser);
   }, [userStore]);  
 
   // Local variables
   let history = useHistory();
-  let deletingUserId:number = 0;
 
+  // Grid State
   const createDataState = (dataState: State) => {
     return {
       result: process(userStore.users.slice(0), dataState),
@@ -73,6 +55,8 @@ const UserList = observer(() => {
   const [result, setResult] = React.useState<DataResult>(initialState.result);
   const [openAddDialog, setOpenAddDialog] = React.useState<boolean>(false);
   const [openDeleteDialog, setOpenDeleteDialog] = React.useState<boolean>(false);
+  const [deletingUserId, setDeletingUserId] = React.useState<number>(0);
+  const [isLoading, setIsLoading] = React.useState<boolean>(false);
 
   // Load User List
   const refreshUser = () => {
@@ -97,37 +81,41 @@ const UserList = observer(() => {
 
   const handleDeleteClick = (item: IUser) => {
     setOpenDeleteDialog(true);
-    deletingUserId = item.id;
+    setDeletingUserId(item.id);
   };
 
   const handleDeleteConfirm = () => {
-    userStore.deleteUser(deletingUserId).then(refreshUser);
+    setIsLoading(true);
+    userStore.deleteUser(deletingUserId).then(() => {
+      refreshUser();
+      setIsLoading(false);
+    });
     setOpenDeleteDialog(false);
   }
+
   const handleCancelAdd = () => {
     setOpenAddDialog(false);
   };
 
   const handleAddSubmit = (event:any) => {
-    const newUser = {
+    setIsLoading(true);
+    const lastLoginSec = new Date(event.lastlogin);
+    const newUser:IUser = {
       id: Date.now(),
       username: event.username,
       firstname: event.firstname,
       lastname: event.lastname,
       enabled: event.enabled,
-      lastlogin: event.lastlogin
+      lastlogin: lastLoginSec.getTime()
     };
-    setTimeout(() => {
-      userStore.addUser(newUser).then(refreshUser);
-    }, 1000);
-    setOpenAddDialog(false);
+    userStore.addUser(newUser).then(() => {
+      setIsLoading(false);
+      refreshUser()
+      setOpenAddDialog(false);
+    });
   };
 
-  const toggleDeleteDialog = (event:any) => {
-    setOpenDeleteDialog(!openDeleteDialog);
-  }
-
-  // Cell Rendering
+  // Grid Cell Rendering
   const columnFullName = (props: GridCellProps) => {
     return (
       <td>
@@ -182,73 +170,71 @@ const UserList = observer(() => {
 
   return (
     <>
-      <div className={classes.list}>
-        <Grid
-          data={result}
-          pageable={true}
-          sortable={{
-            allowUnsort: allowUnsort,
-            mode: multipleSort ? "multiple" : "single",
-          }}
-          filterable={true}
-          {...gridDataState}
-          onDataStateChange={handleGridDataStateChange}
-          onRowClick={handleGridRowClick}
-          style={{ height: "400px" }}>
-          <GridToolbar>
-            &nbsp;&nbsp;&nbsp;
-            <Button
-              title="Add User"
-              themeColor={"primary"}
-              onClick = {() => {setOpenAddDialog(true)}}
-            >
-              Add User
-            </Button>
-            <input
-              type="checkbox"
-              className="k-checkbox k-checkbox-md k-rounded-md"
-              id="unsort"
-              checked={allowUnsort}
-              onChange={(event) => {
-                setAllowUnsort(event.target.checked);
-              }}
-            />
-            <label
-              htmlFor="unsort"
-              className="k-checkbox-label"
-              style={{
-                lineHeight: "1.2",
-              }}
-            >
-              Enable unsorting
-            </label>
-            &nbsp;&nbsp;&nbsp;
-            <input
-              type="checkbox"
-              className="k-checkbox k-checkbox-md k-rounded-md"
-              id="multiSort"
-              checked={multipleSort}
-              onChange={(event) => {
-                setMultipleSort(event.target.checked);
-              }}
-            />
-            <label
-              htmlFor="multiSort"
-              className="k-checkbox-label"
-              style={{
-                lineHeight: "1.2",
-              }}
-            >
-              Enable multiple columns sorting
-            </label>            
-          </GridToolbar>
-          <GridColumn field="username" title="Username" />
-          <GridColumn field="firstname" title="Full Name" cell = {columnFullName} filterable = {false} />
-          <GridColumn field="lastlogin" title="Last Login" cell = {columnLastLogin}  filterable = {false} />
-          <GridColumn field="enabled" cell={columnEnabled} filterable = {false} />
-          <GridColumn cell={columnAction} filterable = {false} />
-        </Grid>
-      </div>
+      <Grid
+        data={result}
+        pageable={true}
+        sortable={{
+          allowUnsort: allowUnsort,
+          mode: multipleSort ? "multiple" : "single",
+        }}
+        filterable={true}
+        {...gridDataState}
+        onDataStateChange={handleGridDataStateChange}
+        onRowClick={handleGridRowClick}
+        style={{ height: "400px" }}>
+        <GridToolbar>
+          &nbsp;&nbsp;&nbsp;
+          <Button
+            title="Add User"
+            themeColor={"primary"}
+            onClick = {() => {setOpenAddDialog(true)}}
+          >
+            Add User
+          </Button>
+          <input
+            type="checkbox"
+            className="k-checkbox k-checkbox-md k-rounded-md"
+            id="unsort"
+            checked={allowUnsort}
+            onChange={(event) => {
+              setAllowUnsort(event.target.checked);
+            }}
+          />
+          <label
+            htmlFor="unsort"
+            className="k-checkbox-label"
+            style={{
+              lineHeight: "1.2",
+            }}
+          >
+            Enable unsorting
+          </label>
+          &nbsp;&nbsp;&nbsp;
+          <input
+            type="checkbox"
+            className="k-checkbox k-checkbox-md k-rounded-md"
+            id="multiSort"
+            checked={multipleSort}
+            onChange={(event) => {
+              setMultipleSort(event.target.checked);
+            }}
+          />
+          <label
+            htmlFor="multiSort"
+            className="k-checkbox-label"
+            style={{
+              lineHeight: "1.2",
+            }}
+          >
+            Enable multiple columns sorting
+          </label>            
+        </GridToolbar>
+        <GridColumn field="username" title="Username" />
+        <GridColumn field="firstname" title="Full Name" cell = {columnFullName} filterable = {false} />
+        <GridColumn field="lastlogin" title="Last Login" cell = {columnLastLogin}  filterable = {false} />
+        <GridColumn field="enabled" cell={columnEnabled} filterable = {false} />
+        <GridColumn cell={columnAction} filterable = {false} />
+      </Grid>
       {openAddDialog && (
       <AddUserDialog
         cancelAdd={handleCancelAdd}
@@ -256,28 +242,30 @@ const UserList = observer(() => {
       />
       )}
       {openDeleteDialog && (
-        <Dialog title={"Please confirm delete"} onClose={() => {setOpenDeleteDialog(false)}}>
-        <p style={{ margin: "25px", textAlign: "center" }}>
-          Are you sure you want to delete?
-        </p>
-        <DialogActionsBar>
-          <Button
-            fillMode="outline"
-            themeColor={"info"}
-            onClick={() => {setOpenDeleteDialog(false)}}
-          >
-            No
-          </Button>
-          <Button
-            themeColor={"primary"}
-            onClick={handleDeleteConfirm}
-          >
-            Yes
-          </Button>
-        </DialogActionsBar>
-      </Dialog>        
+        <Dialog title={"Please confirm to delete"} onClose={() => {setOpenDeleteDialog(false)}}>
+          <p style={{ margin: "25px", textAlign: "center" }}>
+            Are you sure you want to delete?
+          </p>
+          <DialogActionsBar>
+            <Button
+              fillMode="outline"
+              themeColor={"info"}
+              onClick={() => {setOpenDeleteDialog(false)}}
+            >
+              No
+            </Button>
+            <Button
+              themeColor={"primary"}
+              onClick={handleDeleteConfirm}
+            >
+              Yes
+            </Button>
+          </DialogActionsBar>
+        </Dialog>        
       )}
-
+      {isLoading && (
+        <LoadingScreen />
+      )}
     </>
   );
 });

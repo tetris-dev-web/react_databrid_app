@@ -2,9 +2,9 @@ import { makeAutoObservable, observable } from "mobx";
 import { toast } from "react-toastify";
 import axios from '../utils/axios';
 import { IUser } from '../interfaces/User';
+import fakeRequest from "../utils/fakeRequest";
 
 export class UserStore {
-  isLoading: boolean = false;
   users: IUser[];
 
   constructor () {
@@ -45,9 +45,7 @@ export class UserStore {
       return;
     } 
 
-    this.isLoading = true;
     await axios.post('/api/updateUser', user);
-    this.isLoading = false;
 
     const updatedUsers = this.users.map(item => {
       if (item.id === user.id) {
@@ -56,7 +54,6 @@ export class UserStore {
       return item;
     });
     this.users = updatedUsers;
-    console.log(this.users);
     toast.success("User updated", {
       position: toast.POSITION.BOTTOM_CENTER
     });
@@ -76,6 +73,8 @@ export class UserStore {
   deleteUser = async (id: number) => {
     const updatedUsers = this.users.filter(user => user.id !== id);
     
+    await fakeRequest(1000);
+
     this.users = updatedUsers;
     toast.info("User deleted", {
       position: toast.POSITION.BOTTOM_CENTER
