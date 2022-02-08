@@ -1,22 +1,15 @@
 import React, { useState } from "react";
-import { Link } from "react-router-dom";
 import { observer } from "mobx-react";
 import { makeStyles } from "@material-ui/core/styles";
-import {
-  Container,
-  Button,
-  IconButton,
-  Box,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Paper,
-} from "@material-ui/core";
-import EditIcon from "@material-ui/icons/Edit";
-import DeleteIcon from "@material-ui/icons/Delete";
+
+import '@progress/kendo-theme-default/dist/all.scss';
+import '@progress/kendo-theme-default/dist/default-nordic.scss';
+import { DataResult, process, State } from '@progress/kendo-data-query';
+import { Grid, GridColumn, GridCellProps, GridToolbar, GridDataStateChangeEvent, GridRowClickEvent } from '@progress/kendo-react-grid';
+import { Dialog, DialogActionsBar } from '@progress/kendo-react-dialogs';
+import { Button } from '@progress/kendo-react-buttons';
+import { User } from '../interfaces/User';
+
 import UserDialog from "./UserDialog";
 import { useStores } from "../use-stores";
 
@@ -42,69 +35,189 @@ const useStyles = makeStyles({
 
 const UserList = observer(() => {
   const classes = useStyles();
-  const [modalUserOpen, setModalUser] = useState(false);
   const { userStore } = useStores();
+
+  const createDataState = (dataState: State) => {
+    return {
+      result: process(userStore.users.slice(0), dataState),
+      dataState: dataState,
+    };
+  };
+
+  let initialState = createDataState({
+    filter: {
+      logic: "and",
+      filters: [{ field: "username", operator: "contains", value: "" }],
+    },
+    sort: [{
+      field: "username",
+      dir: "asc"
+    }],
+    take: 8,
+    skip: 0,
+  });
+
+  // State Defination
+  const [allowUnsort, setAllowUnsort] = React.useState<boolean>(true);
+  const [multipleSort, setMultipleSort] = React.useState<boolean>(false);
+  const [visibleDialog, setVisibleDialog] = React.useState<boolean>(false);
+  const [gridDataState, setGridDataState] = React.useState<State>(initialState.dataState);
+  const [gridClickedRow, setGridClickedRow] = React.useState<any>({});
+  const [result, setResult] = React.useState<DataResult>(initialState.result);
+  const [openAddForm, setOpenAddForm] = React.useState<boolean>(false);
+
+  // Event Handler
+  const handleGridDataStateChange = (event: GridDataStateChangeEvent) => {
+    let updatedState = createDataState(event.dataState);
+    setResult(updatedState.result);
+    setGridDataState(updatedState.dataState);
+  }
+
+  const handleGridRowClick = (event: GridRowClickEvent) => {
+    setVisibleDialog(true);
+    setGridClickedRow(event.dataItem);
+  }
+
+  const handleEnterEdit = (item: User) => {
+    console.log(item.username);
+  };
+
+  const handleCancelAdd = () => {
+    setOpenAddForm(false);
+  };
+
+  const handleAddSubmit = (event:any) => {
+    let newData = userStore.users.map((item) => {
+      if (event.username === item.username) {
+        item = { ...event };
+      }
+      return item;
+    });
+    console.log(event);
+    setOpenAddForm(false);
+  };
+
+  const toggleDialog = () => {
+    setVisibleDialog(!visibleDialog);
+  };
+
+  // Cell Rendering
+  const columnFullName = (props: GridCellProps) => {
+    return (
+      <td>
+        {props.dataItem.FirstName + " " + props.dataItem.LastName}
+      </td>
+    );
+  }
+  
+  const columnLastLogin = (props: GridCellProps) => {
+    const field = props.field || "";
+    const value = props.dataItem[field];
+    const newDate = new Date(value);
+    return (
+      <td>
+        {new Date(value).toLocaleDateString() + ' ' + new Date(value).toLocaleTimeString()}
+      </td>
+    );
+  }
+  
+  const columnEnabled = (props: GridCellProps) => {
+    const field = props.field || "";
+    const value = props.dataItem[field];
+    return (
+      <td className = {value ? "k-color-info" : "k-color-error"} >
+        {value ? "Yes" : "No"}
+      </td>
+    );
+  }
+
+  const columnAction = (props: GridCellProps) => {
+    return (
+      <td>
+        <Button
+          fillMode="outline"
+          themeColor={"primary"}
+          onClick={() => handleEnterEdit(props.dataItem)}
+        >
+          Edit
+        </Button>      
+      </td>
+    );
+  }
 
   return (
     <>
-      {modalUserOpen && (
+      {openAddForm && (
         <UserDialog
-          isOpen={modalUserOpen}
-          closeModal={() => setModalUser(false)}
+          isOpen={openAddForm}
+          cancelAdd={handleCancelAdd}
+          onSubmit={handleAddSubmit}
         />
       )}
-      <Container maxWidth="lg">
-        <Box className={classes.header}>
-          <h2>User List</h2>
-          <Button
-            color="primary"
-            variant="contained"
-            onClick={() => setModalUser(true)}
-          >
-            New User
-          </Button>
-        </Box>
-        <Box className={classes.list}>
-          <TableContainer component={Paper}>
-            <Table className={classes.table} aria-label="simple table">
-              <TableHead>
-                <TableRow>
-                  <TableCell align="center">ID</TableCell>
-                  <TableCell align="center">Username</TableCell>
-                  <TableCell align="center">FullName</TableCell>
-                  <TableCell align="center">LastLogin</TableCell>
-                  <TableCell align="center">Enabled</TableCell>
-                  <TableCell align="center">Action</TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {userStore.users.map((user) => (
-                  <TableRow key={user.id}>
-                    <TableCell align="center">{user.id}</TableCell>
-                    <TableCell align="center">{user.username}</TableCell>
-                    <TableCell align="center">
-                      {user.firstname} {user.lastname}
-                    </TableCell>
-                    <TableCell align="center">{new Date(user.lastlogin).toLocaleDateString() + ' ' + new Date(user.lastlogin).toLocaleTimeString()}</TableCell>
-                    <TableCell align="center">
-                      {user.enabled ? "True" : "False"}
-                    </TableCell>
-                    <TableCell align="center">
-                      
-                      <IconButton className={classes.marginRight} component={Link} to={`edit/${user.id}`}>
-                        <EditIcon />
-                      </IconButton>
-                      <IconButton onClick={() => userStore.deleteUser(user.id)}>
-                        <DeleteIcon />
-                      </IconButton>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </TableContainer>
-        </Box>
-      </Container>
+        <div className={classes.list}>
+        <Grid
+          data={result}
+          pageable={true}
+          sortable={true}
+          filterable={true}
+          {...gridDataState}
+          onDataStateChange={handleGridDataStateChange}
+          onRowClick={handleGridRowClick}
+          style={{ height: "400px" }}>
+          <GridToolbar>
+            &nbsp;&nbsp;&nbsp;
+            <Button
+              title="Add User"
+              themeColor={"primary"}
+              onClick = {() => {setOpenAddForm(true)}}
+            >
+              Export to Excel
+            </Button>
+            <input
+              type="checkbox"
+              className="k-checkbox k-checkbox-md k-rounded-md"
+              id="unsort"
+              checked={allowUnsort}
+              onChange={(event) => {
+                setAllowUnsort(event.target.checked);
+              }}
+            />
+            <label
+              htmlFor="unsort"
+              className="k-checkbox-label"
+              style={{
+                lineHeight: "1.2",
+              }}
+            >
+              Enable unsorting
+            </label>
+            &nbsp;&nbsp;&nbsp;
+            <input
+              type="checkbox"
+              className="k-checkbox k-checkbox-md k-rounded-md"
+              id="multiSort"
+              checked={multipleSort}
+              onChange={(event) => {
+                setMultipleSort(event.target.checked);
+              }}
+            />
+            <label
+              htmlFor="multiSort"
+              className="k-checkbox-label"
+              style={{
+                lineHeight: "1.2",
+              }}
+            >
+              Enable multiple columns sorting
+            </label>            
+          </GridToolbar>
+          <GridColumn field="username" title="Username" />
+          <GridColumn field="firstname" title="Full Name" cell = {columnFullName} filterable = {false} />
+          <GridColumn field="lastlogin" title="Last Login" cell = {columnLastLogin}  filterable = {false} />
+          <GridColumn field="enabled" cell={columnEnabled} filterable = {false} />
+          <GridColumn cell={columnAction} filterable = {false} />
+        </Grid>
+        </div>
     </>
   );
 });

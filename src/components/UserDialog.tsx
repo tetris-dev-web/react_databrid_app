@@ -24,9 +24,10 @@ const useStyles = makeStyles({
 
 interface IProps {
   isOpen: boolean;
-  closeModal: () => void;
+  cancelAdd: () => void;
+  onSubmit: (event: any) => void;
 }
-export default function UserDialog({ isOpen, closeModal }: IProps) {
+export default function UserDialog({ isOpen, cancelAdd }: IProps) {
   const classes = useStyles();
   const { userStore } = useStores();
 
@@ -65,7 +66,7 @@ export default function UserDialog({ isOpen, closeModal }: IProps) {
       };
       setTimeout(() => {
         userStore.addUser(newUser);
-        closeModal();
+        cancelAdd();
       }, 1000);
     },
   });
@@ -73,7 +74,7 @@ export default function UserDialog({ isOpen, closeModal }: IProps) {
   const { errors, touched, handleSubmit, getFieldProps } = formik;
 
   return (
-    <Modal aria-labelledby="modal-new-todo" open={isOpen} onClose={closeModal}>
+    <Modal aria-labelledby="modal-new-todo" open={isOpen} onClose={cancelAdd}>
       <Box className={classes.content}>
         <h2 id="modal-new-todo">Add User</h2>
         <FormikProvider value={formik}>
