@@ -11,10 +11,18 @@ import {
   TextField,
   FormControlLabel,
 } from "@material-ui/core";
+import {
+  MuiPickersUtilsProvider,
+  KeyboardDateTimePicker
+} from '@material-ui/pickers';
+import 'date-fns';
+import DateFnsUtils from '@date-io/date-fns';
+
 import { makeStyles } from "@material-ui/core/styles";
 import { useStores } from "../use-stores";
 import { observer } from "mobx-react-lite";
 import LoadingScreen from "./LoadingScreen";
+import { IUser } from "../interfaces/User";
 
 const useStyles = makeStyles({
   content: {
@@ -34,16 +42,21 @@ const UserEdit = observer(() => {
   const [isLoading, setIsLoading] = React.useState<boolean>(false);
 
   if (user.length > 0) {
-    const user_item = user[0];
+    const user_item: IUser = user[0];
 
     const [enabled, setEnabled] = useState(user_item.enabled);
+
+    const [selectedDate, setSelectedDate] = useState(user_item.lastlogin);
+    const handleDateChange = (date: any) => {
+      setSelectedDate(date);
+    };
 
     const ValidationSchema = Yup.object().shape({
       username: Yup.string()
         .min(2, "Too Short!")
         .max(15, "Too Long!")
-        .test("alphanumeric", "Username should be alphanumeric", 
-          function(value:any) {
+        .test("alphanumeric", "Username should be alphanumeric",
+          function (value: any) {
             const alphanumericRegex: RegExp = new RegExp(/^[0-9a-zA-Z]+$/);
             return alphanumericRegex.test(value);
           })
@@ -66,13 +79,13 @@ const UserEdit = observer(() => {
       },
       validationSchema: ValidationSchema,
       onSubmit: async (values, { setErrors, setSubmitting, resetForm }) => {
-        const updateUser = {
+        const updateUser: IUser = {
           id: param_id,
           username: values.username,
           firstname: values.firstname,
           lastname: values.lastname,
           enabled: enabled,
-          lastlogin: Date.now()
+          lastlogin: selectedDate
         };
         setIsLoading(true);
         userStore.updateUser(updateUser).then(() => {
@@ -118,6 +131,15 @@ const UserEdit = observer(() => {
                       helperText={touched.lastname && errors.lastname}
                       style={{ marginBottom: "1rem" }}
                     />
+                    <MuiPickersUtilsProvider utils={DateFnsUtils}>
+                      <KeyboardDateTimePicker
+                        fullWidth
+                        label="Last Login"
+                        value={selectedDate}
+                        onChange={handleDateChange}
+                        style={{ marginBottom: "1rem" }}
+                      />
+                    </MuiPickersUtilsProvider>
                     <FormControlLabel
                       control={
                         <Checkbox
@@ -128,22 +150,37 @@ const UserEdit = observer(() => {
                       }
                       label="Enabled"
                     />
-
-                    <Button
-                      type="submit"
-                      fullWidth
-                      variant="contained"
-                      color="primary"
-                      style={{ marginTop: "1rem" }}
-                    >
-                      Update
-                    </Button>
+                    <Grid container>
+                      <Grid item md={5} >
+                        <Button
+                          fullWidth
+                          variant="outlined"
+                          color="primary"
+                          style={{ marginTop: "1rem" }}
+                          onClick={() => { history.push('/'); }}
+                        >
+                          Cancel
+                        </Button>
+                      </Grid>
+                      <Grid item md={2} />
+                      <Grid item md={5} >
+                        <Button
+                          fullWidth
+                          type="submit"
+                          variant="contained"
+                          color="primary"
+                          style={{ marginTop: "1rem" }}
+                        >
+                          Update
+                        </Button>
+                      </Grid>
+                    </Grid>
                   </Form>
                 </FormikProvider>
               </Grid>
             </Grid>
           </Box>
-        </Container>      
+        </Container>
         {isLoading && (
           <LoadingScreen />
         )}
