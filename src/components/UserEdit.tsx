@@ -11,6 +11,7 @@ import {
   TextField,
   FormControlLabel,
 } from "@material-ui/core";
+import { makeStyles, alpha } from "@material-ui/core/styles";
 import {
   MuiPickersUtilsProvider,
   KeyboardDateTimePicker
@@ -18,21 +19,12 @@ import {
 import 'date-fns';
 import DateFnsUtils from '@date-io/date-fns';
 
-import { makeStyles } from "@material-ui/core/styles";
 import { useStores } from "../use-stores";
 import { observer } from "mobx-react-lite";
 import LoadingScreen from "./LoadingScreen";
 import { IUser } from "../interfaces/User";
 
-const useStyles = makeStyles({
-  content: {
-    display: 'flex',
-    flexDirection: 'column'
-  },
-});
-
 const UserEdit = observer(() => {
-  const classes = useStyles();
   const { userStore } = useStores();
   const history = useHistory();
   const { id } = useParams<{ id?: any }>();
@@ -101,7 +93,7 @@ const UserEdit = observer(() => {
     return (
       <>
         <Container maxWidth="lg">
-          <Box className={classes.content}>
+          <Box style={{display: 'flex',flexDirection: 'column'}}>
             <h2>User Item</h2>
             <Grid container>
               <Grid item sm={6}>
@@ -189,7 +181,7 @@ const UserEdit = observer(() => {
   } else {
     return (
       <Container maxWidth="lg">
-        <Box className={classes.content}>
+        <Box >
           <h2>User Item</h2>
           <Grid container>
             <Grid item sm={6}></Grid>
